@@ -60,7 +60,10 @@ struct graph{
 		}
 
 		for (int i = 0; i < vertices.size(); i++){
-			cout << vertices[i]->name << " ";
+			cout << vertices[i]->name;
+			for (int j=0; j<maxLen; j++){
+				cout << " ";
+			}
 		}
 		cout << endl;
 		//print other rows
@@ -81,14 +84,38 @@ struct graph{
 		
 	}
 
-	/*
 	void removeVertex(string delName){//removes a vertex
 		for (int i = 0; i < vertices.size(); i++){//goes through every vertex
 			if (vertices[i]->name == delName){//if it has the name to delete:
 				vertices.erase(vertices.begin() + i);
 			}
+			else{//if it doesn't, look through its connections for the vertex to delete and remove it
+				for (int j = 0; j < vertices[i]->connections.size(); j++){
+					if (vertices[i]->connections[j]->name == delName){
+						vertices[i]->connections.erase(vertices[i]->connections.begin() + j);
+					}
+				}
+			}
 		}
-	}*/
+	}
+
+	void removeEdge(vertex* v1, vertex* v2){
+		for (int i = 0; i < edges.size(); i++){//remove the edge from the vector of edges
+			if ((edges[i]->v1 == v1 and edges[i]->v2 == v2) or (edges[i]->v1 == v2 and edges[i]->v2 == v1)){
+				edges.erase(edges.begin() + i);
+			}
+		}
+		for (int i = 0; i < v1->connections.size(); i++){//remove v2 from the connections of v1
+			if (v1->connections[i] == v2){
+				v1->connections.erase(v1->connections.begin() + i);
+			}
+		}
+		for (int i = 0; i < v2->connections.size(); i++){//remove v1 from the connections of v2
+			if (v2->connections[i] == v1){
+				v2->connections.erase(v2->connections.begin() + i);
+			}
+		}
+	}
 
 	vertex* find(string vertexName){//returns a vertex through its name, if it doesn't exist return nullptr
 		for (int i = 0; i < vertices.size(); i++){
@@ -137,10 +164,25 @@ int main(){
 
 		}
 		else if (command == "RV"){
-			cout << "RV" << endl;
+			string delName;
+			cout << "Enter vertex name to remove: ";
+			cin >> delName;
+			Graph->removeVertex(delName);
 		}
 		else if (command == "RE"){
-			cout << "RE" << endl;
+			cout << "This will remove the edge from vertex 1 to vertex 2 AND from vertex 2 to vertex 1." << endl;
+			string v1name;
+			string v2name;
+			cout << "Enter vertex 1: ";
+			cin >> v1name;
+			cout << "Enter vertex 2: ";
+			cin >> v2name;
+
+			vertex* v1 = Graph->find(v1name);
+			vertex* v2 = Graph->find(v2name);
+			if (v1 and v2){
+				Graph->removeEdge(v1, v2);
+			}
 		}
 		else if (command == "FSP"){
 			cout << "FSP" << endl;
