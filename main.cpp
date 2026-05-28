@@ -198,7 +198,8 @@ struct graph{
 				int neighborIndex = isVinVector(neighbor, vertices);
 				if (isVinVector(neighbor, unvisited) != -1){//if this neighbor hasn't been visited
 					int distToNeighbor = distancesFromV1[currentIndex] + getEdgeWeight(current, neighbor); //calculate the neighbors distance from the starting vertex
-					if (distToNeighbor < distancesFromV1[currentIndex]){//if the calculated distance of a vertex is less than the known distance, update the shortest distance
+					cout << "dist to neighbor " << neighbor->name << ": " << distToNeighbor << endl;
+					if (distToNeighbor < distancesFromV1[neighborIndex]){//if the calculated distance of a vertex is less than the known distance, update the shortest distance
 						distancesFromV1[neighborIndex] = distToNeighbor;
 						previousVertex[neighborIndex] = current;//update the previous vertex for each of the updated distances
 					}
@@ -216,8 +217,26 @@ struct graph{
 			}
 			cout << endl;
 
+			for (int i = 0; i < vertices.size(); i++){
+				cout << vertices[i]->name << " ";
+			}
+			cout << endl;
+			for (int i = 0; i < distancesFromV1.size(); i++){
+				cout << distancesFromV1[i] << " ";
+			}
+			cout << endl;
+			for (int i = 0; i < previousVertex.size(); i++){
+				if (previousVertex[i]){
+					cout << previousVertex[i]->name << " ";
+				}
+				else{
+					cout << "nullptr" << " ";	
+				}
+			}
+			cout << endl;
+
 		}//until all vertices visited
-		
+		cout << "FINAL PRINT: " << endl;	
 		//print out vectors
 		for (int i = 0; i < vertices.size(); i++){
 			cout << vertices[i]->name << " ";
@@ -235,6 +254,19 @@ struct graph{
 				cout << "nullptr" << " ";	
 			}
 		}
+		cout << endl;
+
+		vertex* currentPrint = v2;
+		int currentPrintIndex = isVinVector(v2, vertices);
+		vertex* currentPrev = previousVertex[currentPrintIndex]; //initially set currentPrev to previous vertex of destination vertex
+		cout << currentPrev->name << endl;
+		while(currentPrev != v1){
+			cout << "\r" << "->" << currentPrint->name;
+			currentPrint = currentPrev;
+			currentPrintIndex = isVinVector(currentPrint, vertices);
+			currentPrev = previousVertex[currentPrintIndex];
+		}
+		cout << "\r" << v1->name << "->";
 		cout << endl;
 	}
 };
