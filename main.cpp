@@ -99,7 +99,7 @@ struct graph{
 		}
 	}
 
-	void removeEdge(vertex* v1, vertex* v2){
+	void removeEdge(vertex* v1, vertex* v2){//removes an edge
 		for (int i = 0; i < edges.size(); i++){//remove the edge from the vector of edges
 			if ((edges[i]->v1 == v1 and edges[i]->v2 == v2) or (edges[i]->v1 == v2 and edges[i]->v2 == v1)){
 				edges.erase(edges.begin() + i);
@@ -124,6 +124,118 @@ struct graph{
 			}
 		}
 		return nullptr;
+	}
+
+	int isVinVector(vertex* v, vector<vertex*> vect){//returns the index of v in vect
+		for (int i = 0; i < vect.size(); i++){
+			if (vect[i] == v){
+				return i;
+			}
+		}
+		return -1;//if v is not in vect, return -1
+	}
+
+	float getEdgeWeight(vertex* v1, vertex* v2){//returns the weight of an edge from v1 to v2
+		for (int i = 0; i < edges.size(); i++){
+			if (edges[i]->v1 == v1 and edges[i]->v2 == v2){
+				return edges[i]->weight;
+			}
+		}
+		return -1;//if the edge doesn't exist, return -1
+	}
+
+	void findShortestPath(vertex* v1, vertex* v2){
+		vector<vertex*> visited;
+		vector<vertex*> unvisited;
+		visited.clear();
+		unvisited.clear();
+
+		vector<float> distancesFromV1;
+		vector<vertex*> previousVertex;
+		distancesFromV1.clear();
+		previousVertex.clear();
+
+		vertex* current;
+		
+		for (int i = 0; i < vertices.size(); i++){
+			unvisited.push_back(vertices[i]); //add every vertex to unvisited
+			distancesFromV1.push_back(0); //add filler for distancesFromV1 (this is modified right after)
+			if (vertices[i] == v1){
+				distancesFromV1[i] = 0; //let distance of start vertex to start vertex = 0
+			}
+			else{
+				distancesFromV1[i] = 10000; //let distance of all other vertices from start = infinity (10000)
+			}
+			previousVertex.push_back(nullptr);//fills previousVertex vector with nullptrs
+		}
+
+		while (unvisited.size() > 0){
+			//visit the unvisited vertex with the smallest known distance from the start vertex
+			float minDistance = 10001;
+			string minDistanceName;
+			for (int i=0; i<distancesFromV1.size(); i++){
+				cout << (isVinVector(vertices[i], unvisited) != -1) << endl;
+				if ((distancesFromV1[i] < minDistance) and (isVinVector(vertices[i], unvisited) != -1)){//make sure current vertex were checking hasn't been visited
+					minDistance = distancesFromV1[i];
+					minDistanceName = vertices[i]->name;
+				}
+			}
+			vertex* current;
+			int currentIndex;
+			for (int i=0; i<distancesFromV1.size(); i++){
+				if ((distancesFromV1[i] == minDistance) and (vertices[i]->name == minDistanceName)){
+					current = vertices[i];
+					currentIndex = i;
+					break;
+				}
+			}
+			cout << "current: " << current->name << " index: " << currentIndex << endl;
+
+			//for the current vertex, examine its unvisited neighbors
+			//for the current vertex, calculate distance of each neighbor from start vertex
+			for (int i = 0; i < current->connections.size(); i++){//for each neighbor of current
+				vertex* neighbor = current->connections[i];
+				int neighborIndex = isVinVector(neighbor, vertices);
+				if (isVinVector(neighbor, unvisited) != -1){//if this neighbor hasn't been visited
+					int distToNeighbor = distancesFromV1[currentIndex] + getEdgeWeight(current, neighbor); //calculate the neighbors distance from the starting vertex
+					if (distToNeighbor < distancesFromV1[currentIndex]){//if the calculated distance of a vertex is less than the known distance, update the shortest distance
+						distancesFromV1[neighborIndex] = distToNeighbor;
+						previousVertex[neighborIndex] = current;//update the previous vertex for each of the updated distances
+					}
+				}
+			}
+			visited.push_back(current);//add the current vertex to the list of visited vertices
+			unvisited.erase(unvisited.begin() + isVinVector(current, unvisited));//remove the current vertex from the list of unvisited vertices
+			
+			for (int i=0; i<visited.size(); i++){
+				cout << visited[i]->name << " ";
+			}
+			cout << endl;
+			for (int i=0; i<unvisited.size(); i++){
+				cout << unvisited[i]->name << " ";
+			}
+			cout << endl;
+
+		}//until all vertices visited
+		
+		//print out vectors
+		for (int i = 0; i < vertices.size(); i++){
+			cout << vertices[i]->name << " ";
+		}
+		cout << endl;
+		for (int i = 0; i < distancesFromV1.size(); i++){
+			cout << distancesFromV1[i] << " ";
+		}
+		cout << endl;
+		for (int i = 0; i < previousVertex.size(); i++){
+			if (previousVertex[i]){
+				cout << previousVertex[i]->name << " ";
+			}
+			else{
+				cout << "nullptr" << " ";	
+			}
+		}
+		cout << endl;
 	}
 };
 
@@ -186,6 +298,18 @@ int main(){
 		}
 		else if (command == "FSP"){
 			cout << "FSP" << endl;
+			string v1name;
+			string v2name;
+			cout << "Enter vertex 1: ";
+			cin >> v1name;
+			cout << "Enter vertex 2: ";
+			cin >> v2name;
+
+			vertex* v1 = Graph->find(v1name);
+			vertex* v2 = Graph->find(v2name);
+			if (v1 and v2){
+				Graph->findShortestPath(v1, v2);
+			}	
 		}
 		else if (command == "P"){
 			Graph->printTable();
