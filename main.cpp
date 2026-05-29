@@ -97,6 +97,7 @@ struct graph{
 				}
 			}
 		}
+		delete find(delName);
 	}
 
 	void removeEdge(vertex* v1, vertex* v2){//removes an edge
@@ -154,8 +155,6 @@ struct graph{
 		vector<vertex*> previousVertex;
 		distancesFromV1.clear();
 		previousVertex.clear();
-
-		vertex* current;
 		
 		for (int i = 0; i < vertices.size(); i++){
 			unvisited.push_back(vertices[i]); //add every vertex to unvisited
@@ -172,16 +171,20 @@ struct graph{
 		while (unvisited.size() > 0){
 			//visit the unvisited vertex with the smallest known distance from the start vertex
 			float minDistance = 10001;
-			string minDistanceName;
-			for (int i=0; i<distancesFromV1.size(); i++){
-				cout << (isVinVector(vertices[i], unvisited) != -1) << endl;
-				if ((distancesFromV1[i] < minDistance) and (isVinVector(vertices[i], unvisited) != -1)){//make sure current vertex were checking hasn't been visited
-					minDistance = distancesFromV1[i];
-					minDistanceName = vertices[i]->name;
-				}
-			}
+			//string minDistanceName;
+
 			vertex* current;
 			int currentIndex;
+			for (int i=0; i<distancesFromV1.size(); i++){
+				//cout << (isVinVector(vertices[i], unvisited) != -1) << endl;
+				if ((distancesFromV1[i] < minDistance) and (isVinVector(vertices[i], unvisited) != -1)){//make sure current vertex were checking hasn't been visited
+					minDistance = distancesFromV1[i];
+					current = vertices[i];
+					currentIndex = i;
+					//minDistanceName = vertices[i]->name;
+				}
+			}
+			/*
 			for (int i=0; i<distancesFromV1.size(); i++){
 				if ((distancesFromV1[i] == minDistance) and (vertices[i]->name == minDistanceName)){
 					current = vertices[i];
@@ -189,7 +192,8 @@ struct graph{
 					break;
 				}
 			}
-			cout << "current: " << current->name << " index: " << currentIndex << endl;
+			*/
+			//cout << "current: " << current->name << " index: " << currentIndex << endl;
 
 			//for the current vertex, examine its unvisited neighbors
 			//for the current vertex, calculate distance of each neighbor from start vertex
@@ -198,7 +202,7 @@ struct graph{
 				int neighborIndex = isVinVector(neighbor, vertices);
 				if (isVinVector(neighbor, unvisited) != -1){//if this neighbor hasn't been visited
 					int distToNeighbor = distancesFromV1[currentIndex] + getEdgeWeight(current, neighbor); //calculate the neighbors distance from the starting vertex
-					cout << "dist to neighbor " << neighbor->name << ": " << distToNeighbor << endl;
+					//cout << "dist to neighbor " << neighbor->name << ": " << distToNeighbor << endl;
 					if (distToNeighbor < distancesFromV1[neighborIndex]){//if the calculated distance of a vertex is less than the known distance, update the shortest distance
 						distancesFromV1[neighborIndex] = distToNeighbor;
 						previousVertex[neighborIndex] = current;//update the previous vertex for each of the updated distances
@@ -207,7 +211,7 @@ struct graph{
 			}
 			visited.push_back(current);//add the current vertex to the list of visited vertices
 			unvisited.erase(unvisited.begin() + isVinVector(current, unvisited));//remove the current vertex from the list of unvisited vertices
-			
+			/*	
 			for (int i=0; i<visited.size(); i++){
 				cout << visited[i]->name << " ";
 			}
@@ -234,6 +238,7 @@ struct graph{
 				}
 			}
 			cout << endl;
+			*/
 
 		}//until all vertices visited
 		cout << "FINAL PRINT: " << endl;	
@@ -256,18 +261,35 @@ struct graph{
 		}
 		cout << endl;
 
+		string Chain;
+		Chain.clear();
+		bool possiblePath = true;
+
 		vertex* currentPrint = v2;
 		int currentPrintIndex = isVinVector(v2, vertices);
 		vertex* currentPrev = previousVertex[currentPrintIndex]; //initially set currentPrev to previous vertex of destination vertex
-		cout << currentPrev->name << endl;
-		while(currentPrev != v1){
-			cout << "\r" << "->" << currentPrint->name;
-			currentPrint = currentPrev;
-			currentPrintIndex = isVinVector(currentPrint, vertices);
-			currentPrev = previousVertex[currentPrintIndex];
+
+		Chain += currentPrint->name;//print end of the path
+		while(currentPrev != v1){//print all vertices inbetween the path
+			Chain.insert(0, "->" + currentPrev->name + "->");
+			if (currentPrev != nullptr){
+				currentPrint = currentPrev;
+				currentPrintIndex = isVinVector(currentPrint, vertices);
+				currentPrev = previousVertex[currentPrintIndex];
+			}
+			else{
+				possiblePath = false;
+				break;
+			}
 		}
-		cout << "\r" << v1->name << "->";
-		cout << endl;
+		if (possiblePath){
+			Chain.insert(0, v1->name);//print start of the path
+			cout << "Path: " << Chain << endl;
+			cout << "Path Length: " << distancesFromV1[isVinVector(v2, vertices)] << endl;
+		}
+		else{
+			cout << "No possible path!" << endl;
+		}
 	}
 };
 
