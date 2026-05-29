@@ -116,6 +116,16 @@ struct graph{
 				v2->connections.erase(v2->connections.begin() + i);
 			}
 		}
+		delete findEdge(v1, v2);
+	}
+
+	edge* findEdge(vertex* v1, vertex* v2){//returns an edge through its v1 and v2
+		for (int i = 0; i < edges.size(); i++){
+			if (edges[i]->v1 == v1 and edges[i]->v2 == v2){
+				return edges[i];
+			}
+		}
+		return nullptr;//if the edge doesn't exist, return nullptr
 	}
 
 	vertex* find(string vertexName){//returns a vertex through its name, if it doesn't exist return nullptr
@@ -241,6 +251,7 @@ struct graph{
 			*/
 
 		}//until all vertices visited
+		/*
 		cout << "FINAL PRINT: " << endl;	
 		//print out vectors
 		for (int i = 0; i < vertices.size(); i++){
@@ -260,7 +271,7 @@ struct graph{
 			}
 		}
 		cout << endl;
-
+		*/
 		string Chain;
 		Chain.clear();
 		bool possiblePath = true;
@@ -271,8 +282,8 @@ struct graph{
 
 		Chain += currentPrint->name;//print end of the path
 		while(currentPrev != v1){//print all vertices inbetween the path
-			Chain.insert(0, "->" + currentPrev->name + "->");
 			if (currentPrev != nullptr){
+				Chain.insert(0, "->" + currentPrev->name + "->");
 				currentPrint = currentPrev;
 				currentPrintIndex = isVinVector(currentPrint, vertices);
 				currentPrev = previousVertex[currentPrintIndex];
